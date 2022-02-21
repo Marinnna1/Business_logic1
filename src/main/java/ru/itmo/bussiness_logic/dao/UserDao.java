@@ -3,8 +3,8 @@ package ru.itmo.bussiness_logic.dao;
 
 import org.springframework.stereotype.Repository;
 import ru.itmo.bussiness_logic.dto.UserDto;
-import ru.itmo.bussiness_logic.encrypt.EncryptionUtil;
 import ru.itmo.bussiness_logic.entities.User;
+
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -32,29 +32,47 @@ public class UserDao {
         return null;
     }
 
-    public UserDto findUser(String login, String password) throws NoSuchAlgorithmException {
-        List<User> users = (List<User>) entityManager.createQuery("From User as user where user.login ='" + login + "' and user.password='" + password + "'").getResultList();
-        if(!users.isEmpty()){
-            System.out.println(users.get(0).getLogin());
-            return new UserDto( login, password, "");
+    public User findUser(String login, String password) throws NoSuchAlgorithmException {
+        User currentUser = findByLogin(login);
+        if(currentUser!=null){
+//            System.out.println(users.get(0).getLogin());
+            return currentUser;
+//            return new UserDto( login, password, currentUser.getEmail(),currentUser.getToken(),currentUser.getRole().toString(), "");
         }
-        return new UserDto( null, null, "");
+        return null;
+//        return new UserDto( null, null, "");
     }
 
-    public boolean findByLogin(String login) {
+    public User findByLogin(String login) {
+        List<User> users = (List<User>) entityManager.createQuery("From User as user where user.login ='" + login + "'").getResultList();
+        if( !users.isEmpty()){
+            return users.get(0);
+        }
+        else {
+            return null;
+        }
+    }
+
+    public boolean isThereUserWithSuchLogin(String login) {
         List<User> users = (List<User>) entityManager.createQuery("From User as user where user.login ='" + login + "'").getResultList();
         return !users.isEmpty();
     }
 
     public UserDto save(User user) throws NoSuchAlgorithmException {
-        if(!findByLogin(user.getLogin())) {
-            user.setToken(EncryptionUtil.encrypt(user.getLogin() + user.getId()));
+        if(!isThereUserWithSuchLogin(user.getLogin())) {
+//            System.out.println("dao ="+user.getToken());
+//            user.setToken(user.getToken()); //token
             entityManager.persist(user);
-            return new UserDto(user.getLogin(), user.getPassword(), user.getEmail(), "");
+            return new UserDto(user.getLogin(), user.getPassword(), user.getEmail(),user.getRole().toString(),user.getToken(), "");
         }
         return new UserDto(null, null, null, "Cant create user with same login: user '" + user.getLogin() + "' already exists ");
     }
+
+    public void update(User user){
+        entityManager.merge(user);
+    }
 }
+
 
 
 

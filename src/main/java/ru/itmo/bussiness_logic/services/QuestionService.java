@@ -2,6 +2,7 @@ package ru.itmo.bussiness_logic.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import ru.itmo.bussiness_logic.dao.QuestionDao;
 import ru.itmo.bussiness_logic.dto.QuestionDto;
 import ru.itmo.bussiness_logic.entities.Question;
@@ -14,12 +15,11 @@ public class QuestionService {
     private QuestionDao questionDao;
 
     public QuestionDto addQuestion(QuestionDto questionDto){
-
         try {
             return questionDao.save(new Question(questionDto.getCreatorId(), questionDto.getHead(), questionDto.getBody(), false, Tag.valueOf(questionDto.getTag())), questionDto.getToken());
         }
         catch (NullPointerException e){
-           return new QuestionDto("Bad request missing some of the parameters");
+            return new QuestionDto("Bad request missing some of the parameters");
         }
     }
 
@@ -32,6 +32,20 @@ public class QuestionService {
         questionDto.setMsg("Success");
         return questionDto;
     }
+
+
+
+    public QuestionDto changeQuestionStatus(Integer questionId, boolean isValid) {
+        if(questionId==null)
+        {
+            return new QuestionDto("Bad request no id found");
+        }
+        if(!isValid) {
+            return questionDao.deleteQuestion(questionId);
+        }
+        return questionDao.changeQuestionStatusToEvaluated(questionId);
+    }
+
 
     public QuestionDto deleteQuestion(Integer questionId, String token){
         if(questionId==null)

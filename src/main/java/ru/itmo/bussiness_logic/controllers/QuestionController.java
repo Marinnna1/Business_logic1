@@ -1,12 +1,8 @@
 package ru.itmo.bussiness_logic.controllers;
 
 
-import com.sun.istack.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import ru.itmo.bussiness_logic.dto.QuestionDto;
 import ru.itmo.bussiness_logic.services.QuestionService;
 
@@ -23,10 +19,21 @@ public class QuestionController {
         return questionService.addQuestion(question);
     }
 
+
+    @PostMapping("change_status")
+    public QuestionDto changeQuestionStatus(@RequestBody QuestionDto questionDto) {
+        return questionService.changeQuestionStatus(questionDto.getId(), questionDto.getEvaluated());
+    }
+
+
+
+
     @GetMapping(path = "user/{userId}")
     public QuestionDto getForUser(@PathVariable int userId) {
         return questionService.getForUser(userId);
     }
+
+
 
     @DeleteMapping("delete")
     public QuestionDto deleteQuestion(@RequestBody QuestionDto questionDto){
@@ -38,6 +45,8 @@ public class QuestionController {
         }
 
     }
+
+
 
 
     @GetMapping("all")

@@ -1,14 +1,13 @@
 package ru.itmo.bussiness_logic.dao;
 
-
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
 import ru.itmo.bussiness_logic.dto.QuestionDto;
 import ru.itmo.bussiness_logic.entities.Question;
 import ru.itmo.bussiness_logic.entities.User;
+
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -32,17 +31,20 @@ public class QuestionDao {
     public QuestionDto save(Question question, String token) {
         String userToken = userDao.findUserById(question.getCreatorId()).getToken();
         if(token.equals(userToken)) {
-            entityManager.persist(question);
-            entityManager.flush(); //to get generated id
-            // send id , creators id, evaluated=false and tags to client
-            return new QuestionDto(question.getId(), question.getCreatorId(), "", "", false, question.getTag().toString(), null);
+        entityManager.persist(question);
+        entityManager.flush(); //to get generated id
+        // send id , creators id, evaluated=false and tags to client
+        return new QuestionDto(question.getId(), question.getCreatorId(), "", "", false, question.getTag().toString(), null);
         }
-        return new QuestionDto("Invalid user id");
+       return new QuestionDto("Invalid user id");
     }
 
 
     public QuestionDto deleteQuestion (int id, String token) {
         Question question = findQuestionById(id);
+        if(question==null){
+            return new QuestionDto("No question with id = "+id);
+        }
         System.out.println(question.toString());
         if(userDao.isThereUserWithSuchId(question.getCreatorId())) {
             User owner = userDao.findUserById(question.getCreatorId());
@@ -50,10 +52,32 @@ public class QuestionDao {
                 entityManager.remove(question);
                 return new QuestionDto(question.getId(), question.getCreatorId(), question.getHead(), question.getBody(), true, question.getTag().toString(), null);
             }
-            return new QuestionDto("It's not your question");
+           return new QuestionDto("It's not your question");
         }
         return new QuestionDto("Invalid user id");
     }
+
+    public QuestionDto deleteQuestion (int id) {
+        Question question = findQuestionById(id);
+        if(question==null){
+            return new QuestionDto("No question with id = "+id);
+        }
+        entityManager.remove(question);
+        return new QuestionDto("Question with id " + id + " was removed");
+    }
+
+
+    public QuestionDto changeQuestionStatusToEvaluated(int id) {
+        Question question = findQuestionById(id);
+        if(question==null){
+            return new QuestionDto("No question with id = "+id);
+        }
+        question.setEvaluated(true);
+        entityManager.merge(question);
+        return new QuestionDto("Question with id " + id + " was evaluated");
+    }
+
+
 
     public QuestionDto getQuestionsByUserId(int userId) {
         if(userDao.isThereUserWithSuchId(userId)){
@@ -70,9 +94,6 @@ public class QuestionDao {
         List<Question> questions = (List<Question>) entityManager.createQuery("From Question as q").getResultList();
         return new QuestionDto(null,null,"","",true,"",questions);
     }
-
-
-
 
 
 }

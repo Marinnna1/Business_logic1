@@ -23,6 +23,16 @@ public class QuestionDto {
         this.questionsOfParticularUser=questionsOfParticularUser;
     }
 
+
+    public QuestionDto(Integer creatorId, String head, String body, boolean evaluated, String tag, String token) {
+        this.creatorId = creatorId;
+        this.head = head;
+        this.body = body;
+        this.evaluated = evaluated;
+        this.tag = tag;
+        this.token = token;
+    }
+
     public QuestionDto(Integer id, Integer creatorId, String head, String body, boolean evaluated, String tag, List<Question> questionsOfParticularUser, String msg) {
         this.id = id;
         this.creatorId = creatorId;
@@ -52,6 +62,7 @@ public class QuestionDto {
 
     private Integer id;
 
+
     private Integer creatorId;
 
     private User creator;
@@ -60,7 +71,7 @@ public class QuestionDto {
 
     private String body;
 
-    private boolean evaluated;
+    private Boolean evaluated;
 
     private String tag;
 
@@ -88,8 +99,12 @@ public class QuestionDto {
         return body;
     }
 
-    public boolean isEvaluated() {
+    public Boolean getEvaluated() {
         return evaluated;
+    }
+
+    public void setEvaluated(boolean evaluated) {
+        this.evaluated = evaluated;
     }
 
     public String getTag() {
@@ -116,7 +131,9 @@ public class QuestionDto {
         return token;
     }
 
+
     public void setToken(String token) {
         this.token = token;
     }
 }
+
